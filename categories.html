@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Categories — LuminaFrame</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <header class="bg-white sticky top-0 z-50">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo"><i class="fas fa-camera-retro"></i> LuminaFrame</a>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="gallery.html">Gallery</a>
+                    <a href="categories.html">Categories</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search images...">
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-12">
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl md:text-4xl font-semibold">Categories</h1>
+            <p class="text-gray-600 mt-2">Browse images by category. Click a category to view sample images.</p>
+        </header>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <a href="gallery.html" class="category-card block bg-white rounded shadow overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=60" alt="Nature" class="w-full h-40 object-cover">
+                <div class="p-4 text-center">
+                    <h3 class="font-semibold">Nature</h3>
+                    <p class="text-sm text-gray-500">Landscapes, forests, and natural scenes</p>
+                </div>
+            </a>
+
+            <a href="gallery.html" class="category-card block bg-white rounded shadow overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=60" alt="Urban" class="w-full h-40 object-cover">
+                <div class="p-4 text-center">
+                    <h3 class="font-semibold">Urban</h3>
+                    <p class="text-sm text-gray-500">Street photography and architecture</p>
+                </div>
+            </a>
+
+            <a href="gallery.html" class="category-card block bg-white rounded shadow overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=60" alt="Portrait" class="w-full h-40 object-cover">
+                <div class="p-4 text-center">
+                    <h3 class="font-semibold">Portrait</h3>
+                    <p class="text-sm text-gray-500">Faces and personal stories</p>
+                </div>
+            </a>
+
+            <!-- Travel category removed because the referenced image was not displaying correctly -->
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">&copy; 2025 LuminaFrame</div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const links = document.querySelectorAll('.nav-links a');
+            const file = location.pathname.split('/').pop() || 'index.html';
+            links.forEach(a => {
+                const href = a.getAttribute('href');
+                if (href === file) a.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

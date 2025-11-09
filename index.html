@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuminaFrame - Interactive Image Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Tailwind via CDN (good for prototyping). For production, integrate Tailwind properly. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white sticky top-0 z-50">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <i class="fas fa-camera-retro"></i>
+                    LuminaFrame
+                </a>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="gallery.html">Gallery</a>
+                    <a href="categories.html">Categories</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search images...">
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero bg-center bg-cover">
+        <div class="container">
+            <h1 class="text-4xl md:text-6xl leading-tight drop-shadow-md">Discover Beautiful Photography</h1>
+            <p>Explore our curated collection of stunning images from talented photographers around the world. Use our lightbox feature to view images in full detail.</p>
+            <button class="btn btn-primary shadow-lg transform hover:-translate-y-1 transition duration-300">Explore Gallery</button>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Featured Gallery</h2>
+            </div>
+            
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="nature">Nature</button>
+                <button class="filter-btn" data-filter="urban">Urban</button>
+                <button class="filter-btn" data-filter="portrait">Portrait</button>
+            </div>
+            
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Images will be dynamically added here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Share Your Photos</h2>
+            </div>
+            <div class="upload-container">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="upload-text">Drag & Drop your images here</div>
+                    <div class="upload-text">or</div>
+                    <div class="upload-controls">
+                        <label for="uploadCategory" class="sr-only">Select category</label>
+                        <select id="uploadCategory" class="px-3 py-2 rounded-full border" title="Choose category for uploaded images">
+                            <option value="uploaded">Uploaded</option>
+                            <option value="nature">Nature</option>
+                            <option value="urban">Urban</option>
+                            <option value="portrait">Portrait</option>
+                        </select>
+                        <button type="button" class="upload-btn" id="browseBtn">Browse Files</button>
+                    </div>
+                    <input type="file" id="fileInput" class="file-input" multiple accept="image/*" title="Select image files to upload" aria-label="Select image files to upload">
+                </div>
+                <div class="upload-preview" id="uploadPreview"></div>
+                <div class="upload-status" id="uploadStatus"></div>
+                <p>Supported formats: JPG, PNG, GIF (Max 10MB per image)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>LuminaFrame</h3>
+                    <p>Share and discover beautiful photography. Curated collections and easy uploads.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Gallery</a></li>
+                        <li><a href="#">Categories</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-envelope"></i> aminshemsa@gmail.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Zanzibar,Tanzania</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 LuminaFrame. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous image" title="Previous image">
+            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next image" title="Next image">
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+        </button>
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightboxImage">
+            <div class="lightbox-caption" id="lightboxCaption"></div>
+        </div>
+    </div>
+
+    <script>
+        // Gallery data - initial images
+        const initialImages = [
+            {
+                id: 1,
+                src: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1575&q=80',
+                title: 'Mountain Serenity',
+                category: 'nature'
+            },
+            {
+                id: 2,
+                src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1544&q=80',
+                title: 'Urban Dreams',
+                category: 'urban'
+            },
+            {
+                id: 3,
+                src: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1588&q=80',
+                title: 'Thoughtful Moment',
+                category: 'portrait'
+            },
+            
+            {
+                id: 5,
+                src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80',
+                title: 'Enchanted Forest',
+                category: 'nature'
+            },
+            {
+                id: 6,
+                src: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                title: 'City Architecture',
+                category: 'urban'
+            }
+        ];
+
+        // State management
+        let galleryImages = [...initialImages];
+        let currentImageIndex = 0;
+        // uploadedFiles will hold objects: { id: number, file: File, category: string }
+        let uploadedFiles = [];
+        let uploadCounter = 0;
+        // Local storage key for persisted user uploads
+        const STORAGE_KEY = 'luminaframe_user_images_v1';
+
+        // Load stored images (if any) from localStorage and append them to galleryImages
+        function loadStoredImages() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const stored = JSON.parse(raw);
+                if (!Array.isArray(stored)) return;
+                // Append stored images to the galleryImages array
+                stored.forEach(item => {
+                    // Basic validation
+                    if (item && item.src && item.id) {
+                        galleryImages.push({
+                            id: item.id,
+                            src: item.src,
+                            title: item.title || 'Uploaded Image',
+                            category: item.category || 'uploaded'
+                        });
+                    }
+                });
+            } catch (err) {
+                console.warn('Could not load stored images:', err);
+            }
+        }
+
+        // Save user-uploaded images (data URLs) to localStorage
+        function saveStoredImages() {
+            try {
+                // Persist only data-URL images (uploaded by the user)
+                const toStore = galleryImages
+                    .filter(img => typeof img.src === 'string' && img.src.startsWith('data:'))
+                    .map(img => ({ id: img.id, src: img.src, title: img.title, category: img.category }));
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+            } catch (err) {
+                // Handle quota exceeded
+                console.error('Failed to save images to localStorage:', err);
+                try {
+                    // if it's quota error, inform user
+                    alert('Unable to save uploaded images to your browser storage. This may be due to storage limits. Consider uploading fewer/lighter images or use a browser with larger storage.');
+                } catch (e) {}
+            }
+        }
+
+        // DOM Elements
+        const galleryGrid = document.getElementById('galleryGrid');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxCaption = document.getElementById('lightboxCaption');
+        const lightboxClose = document.getElementById('lightboxClose');
+        const lightboxPrev = document.getElementById('lightboxPrev');
+        const lightboxNext = document.getElementById('lightboxNext');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+
+        // Initialize the gallery
+        function initGallery() {
+                // Load any stored user uploads before rendering
+                loadStoredImages();
+                renderGallery();
+                setupEventListeners();
+        }
+
+        // Render gallery images
+        function renderGallery() {
+            galleryGrid.innerHTML = '';
+            
+            galleryImages.forEach((image, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.setAttribute('data-category', image.category);
+                
+                galleryItem.innerHTML = `
+                    <img src="${image.src}" alt="${image.title}">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">${image.title}</div>
+                        <div class="gallery-item-category">${image.category.charAt(0).toUpperCase() + image.category.slice(1)}</div>
+                    </div>
+                    <button class="delete-btn" data-id="${image.id}" aria-label="Delete image" title="Delete image">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                `;
+                
+                galleryGrid.appendChild(galleryItem);
+                
+                // Add click event to open lightbox
+                galleryItem.addEventListener('click', (e) => {
+                    if (!e.target.closest('.delete-btn')) {
+                        openLightbox(index);
+                    }
+                });
+                
+                // Add delete event
+                const deleteBtn = galleryItem.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteImage(image.id);
+                });
+            });
+        }
+
+        // Delete an image
+        function deleteImage(id) {
+            galleryImages = galleryImages.filter(img => img.id !== id);
+            renderGallery();
+            // Update persisted storage after deletion
+            try { saveStoredImages(); } catch (e) { /* ignore */ }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter buttons (click + drop target for assigning category to preview thumbnails)
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    const filter = button.getAttribute('data-filter');
+                    filterGallery(filter);
+                });
+
+                // Allow dropping a preview onto a filter button to set its category
+                button.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    button.classList.add('drag-over');
+                });
+
+                button.addEventListener('dragleave', () => {
+                    button.classList.remove('drag-over');
+                });
+
+                button.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    button.classList.remove('drag-over');
+                    const uId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                    const fileObj = uploadedFiles.find(f => f.id === uId);
+                    if (fileObj) {
+                        const newCategory = button.getAttribute('data-filter');
+                        fileObj.category = newCategory === 'all' ? 'uploaded' : newCategory;
+                        // update preview badge if present
+                        const badge = uploadPreview.querySelector(`[data-u-id="${uId}"] .preview-badge`);
+                        if (badge) badge.textContent = fileObj.category;
+                    }
+                });
+            });
+            
+            // Upload area events
+            browseBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop events
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('active');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('active');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('active');
+                
+                if (e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            // Allow dropping a preview onto the gallery grid to upload that single file at the drop location
+            galleryGrid.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            galleryGrid.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const uId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                const fileObj = uploadedFiles.find(f => f.id === uId);
+                if (fileObj) {
+                    uploadSingleFile(fileObj);
+                }
+            });
+            
+            // Lightbox events
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightboxPrev.addEventListener('click', prevImage);
+            lightboxNext.addEventListener('click', nextImage);
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('active')) return;
+                
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    prevImage();
+                } else if (e.key === 'ArrowRight') {
+                    nextImage();
+                }
+            });
+            
+            // Close lightbox when clicking outside the image
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+        }
+
+        // Filter gallery by category
+        function filterGallery(filter) {
+            const items = document.querySelectorAll('.gallery-item');
+            
+            items.forEach(item => {
+                if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                    item.style.display = 'block';
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'scale(1)';
+                    }, 10);
+                } else {
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        item.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+
+        // Handle file selection
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length) {
+                handleFiles(files);
+            }
+        }
+
+        // Handle uploaded files
+        function handleFiles(files) {
+            uploadedFiles = [];
+            uploadPreview.innerHTML = '';
+            
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024) {
+                    const categorySelect = document.getElementById('uploadCategory');
+                    const category = categorySelect ? categorySelect.value : 'uploaded';
+                    const fileObj = { id: uploadCounter++, file, category };
+                    uploadedFiles.push(fileObj);
+                    createPreview(fileObj);
+                } else {
+                    alert(`File ${file.name} is not a supported image or is too large (max 10MB).`);
+                }
+            });
+            
+            if (uploadedFiles.length > 0) {
+                uploadStatus.textContent = `Ready to upload ${uploadedFiles.length} image(s)`;
+                uploadStatus.style.display = 'block';
+                uploadStatus.style.color = 'var(--success)';
+                
+                // Auto-upload after a short delay (keep as gentle default)
+                setTimeout(uploadImages, 1000);
+            }
+        }
+
+        // Create preview for uploaded file (fileObj: {id,file,category})
+        function createPreview(fileObj) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.setAttribute('draggable', 'true');
+                previewItem.dataset.uId = fileObj.id;
+                
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" alt="${fileObj.file.name}">
+                    <span class="preview-badge">${fileObj.category}</span>
+                    <button type="button" class="preview-remove" aria-label="Remove preview" title="Remove preview">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                `;
+                
+                uploadPreview.appendChild(previewItem);
+                
+                // Drag start: attach the fileObj id so drop targets can read it
+                previewItem.addEventListener('dragstart', (ev) => {
+                    ev.dataTransfer.setData('text/plain', String(fileObj.id));
+                });
+
+                // Add remove event
+                const removeBtn = previewItem.querySelector('.preview-remove');
+                removeBtn.addEventListener('click', () => {
+                    previewItem.remove();
+                    uploadedFiles = uploadedFiles.filter(f => f.id !== fileObj.id);
+                    
+                    if (uploadedFiles.length === 0) {
+                        uploadStatus.style.display = 'none';
+                    }
+                });
+            };
+            
+            reader.readAsDataURL(fileObj.file);
+        }
+
+        // Upload images to gallery (batch)
+        function uploadImages() {
+            if (uploadedFiles.length === 0) return;
+            
+            uploadedFiles.forEach((fileObj, index) => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    // Generate a unique ID
+                    const newId = Math.max(...galleryImages.map(img => img.id), 0) + 1;
+                    
+                    // Create new image object
+                    const newImage = {
+                        id: newId,
+                        src: e.target.result,
+                        title: fileObj.file.name.split('.')[0],
+                        category: fileObj.category || 'uploaded'
+                    };
+                    
+                    // Add to gallery
+                    galleryImages.push(newImage);
+                    
+                    // Update status
+                    uploadStatus.textContent = `Uploaded ${index + 1}/${uploadedFiles.length} image(s)`;
+                    
+                    // If this is the last image, re-render gallery
+                    if (index === uploadedFiles.length - 1) {
+                        setTimeout(() => {
+                            renderGallery();
+                            // Save user-uploaded images to localStorage
+                            try { saveStoredImages(); } catch (e) { /* ignore */ }
+                            uploadStatus.textContent = 'Upload completed successfully!';
+                            uploadStatus.style.color = 'var(--success)';
+                            
+                            // Clear preview and reset after delay
+                            setTimeout(() => {
+                                uploadPreview.innerHTML = '';
+                                uploadStatus.style.display = 'none';
+                                uploadedFiles = [];
+                                fileInput.value = '';
+                            }, 2000);
+                        }, 500);
+                    }
+                };
+                
+                reader.readAsDataURL(fileObj.file);
+            });
+        }
+
+        // Upload a single fileObj immediately (used when dropping a preview onto the gallery)
+        function uploadSingleFile(fileObj) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const newId = Math.max(...galleryImages.map(img => img.id), 0) + 1;
+                const newImage = {
+                    id: newId,
+                    src: e.target.result,
+                    title: fileObj.file.name.split('.')[0],
+                    category: fileObj.category || 'uploaded'
+                };
+                galleryImages.push(newImage);
+                renderGallery();
+
+                // Remove the preview and entry from uploadedFiles
+                const previewEl = uploadPreview.querySelector(`[data-u-id="${fileObj.id}"]`);
+                if (previewEl) previewEl.remove();
+                uploadedFiles = uploadedFiles.filter(f => f.id !== fileObj.id);
+                uploadStatus.textContent = 'Upload completed successfully!';
+                setTimeout(() => {
+                    uploadStatus.style.display = uploadedFiles.length ? 'block' : 'none';
+                }, 1200);
+                // Persist this upload to localStorage
+                try { saveStoredImages(); } catch (e) { /* ignore */ }
+            };
+            reader.readAsDataURL(fileObj.file);
+        }
+
+        // Lightbox functions
+        function openLightbox(index) {
+            currentImageIndex = index;
+            updateLightbox();
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateLightbox() {
+            const currentImage = galleryImages[currentImageIndex];
+            lightboxImage.src = currentImage.src;
+            lightboxCaption.textContent = `${currentImage.title} - ${currentImage.category.charAt(0).toUpperCase() + currentImage.category.slice(1)}`;
+        }
+
+        function prevImage() {
+            currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+            updateLightbox();
+        }
+
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+            updateLightbox();
+        }
+
+        // Initialize the gallery when page loads
+        document.addEventListener('DOMContentLoaded', initGallery);
+        
+        // Highlight active navigation link based on current file
+        document.addEventListener('DOMContentLoaded', () => {
+            const links = document.querySelectorAll('.nav-links a');
+            const file = location.pathname.split('/').pop() || 'index.html';
+            links.forEach(a => {
+                const href = a.getAttribute('href');
+                if (href === file || (href === 'index.html' && file === '')) {
+                    a.classList.add('active');
+                } else {
+                    a.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

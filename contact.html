@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact — LuminaFrame</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <header class="bg-white sticky top-0 z-50">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo"><i class="fas fa-camera-retro"></i> LuminaFrame</a>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="gallery.html">Gallery</a>
+                    <a href="categories.html">Categories</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search images...">
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-12">
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl md:text-4xl font-semibold">Contact</h1>
+            <p class="text-gray-600 mt-2">Questions, feedback or partnerships — we'd love to hear from you.</p>
+        </header>
+
+        <section class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+            <form id="contactForm">
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium mb-1">Your name</label>
+                    <input type="text" id="name" title="Your name" placeholder="e.g. Alex Johnson" class="w-full border px-3 py-2 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="email" title="Your email" placeholder="you@example.com" class="w-full border px-3 py-2 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="message" class="block text-sm font-medium mb-1">Message</label>
+                    <textarea id="message" title="Message" placeholder="Write your message here" class="w-full border px-3 py-2 rounded" rows="5" required></textarea>
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                    <p class="text-sm text-gray-500">Or email us at <a href="mailto:aminshemsa@gmail.com">aminshemsa@gmail.com</a></p>
+                </div>
+                <div id="contactAlert" class="sr-only mt-4" role="status" aria-live="polite"></div>
+            </form>
+        </section>
+        <script>
+            (function () {
+                const FORM_KEY = 'luminaframe_messages_v1';
+                const form = document.getElementById('contactForm');
+                const alertEl = document.getElementById('contactAlert');
+
+                function showAlert(message, type = 'success') {
+                    alertEl.className = '';
+                    alertEl.classList.add('mt-4', 'p-3', 'rounded');
+                    if (type === 'success') {
+                        alertEl.classList.add('bg-green-100', 'text-green-800');
+                    } else {
+                        alertEl.classList.add('bg-red-100', 'text-red-800');
+                    }
+                    alertEl.textContent = message;
+                    alertEl.setAttribute('role', 'status');
+                    alertEl.classList.remove('sr-only');
+                    alertEl.focus && alertEl.focus();
+                }
+
+                function clearAlert() {
+                    alertEl.className = 'sr-only';
+                    alertEl.textContent = '';
+                }
+
+                function saveMessageLocally(obj) {
+                    try {
+                        const raw = localStorage.getItem(FORM_KEY);
+                        const arr = raw ? JSON.parse(raw) : [];
+                        arr.push(obj);
+                        localStorage.setItem(FORM_KEY, JSON.stringify(arr));
+                        return true;
+                    } catch (err) {
+                        console.warn('Could not save message locally:', err);
+                        return false;
+                    }
+                }
+
+                function validateEmail(email) {
+                    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                }
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    clearAlert();
+
+                    const name = document.getElementById('name').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const message = document.getElementById('message').value.trim();
+
+                    if (!name) { showAlert('Please enter your name.', 'error'); return; }
+                    if (!email || !validateEmail(email)) { showAlert('Please enter a valid email address.', 'error'); return; }
+                    if (!message) { showAlert('Please type a message before sending.', 'error'); return; }
+
+                    const recipient = 'aminshemsa@gmail.com';
+                    const subject = encodeURIComponent('LuminaFrame contact from ' + name);
+                    const bodyText = message + '\n\n--\nFrom: ' + name + ' <' + email + '>\nSent: ' + new Date().toLocaleString();
+                    const body = encodeURIComponent(bodyText);
+
+                    // Try to open the user's mail client via mailto.
+                    // This will usually open the default mail app. We also save a copy locally.
+                    const mailto = `mailto:${recipient}?subject=${subject}&body=${body}`;
+
+                    // Save locally first (best-effort)
+                    const saved = saveMessageLocally({ id: Date.now(), name, email, message, date: new Date().toISOString() });
+
+                    // Open mailto in a new window/tab so the site stays visible
+                    try {
+                        window.location.href = mailto;
+                        showAlert('Your message was prepared in your mail client. A local copy was saved.', 'success');
+                        form.reset();
+                    } catch (err) {
+                        // If opening mail client fails, at least inform the user that the message was saved locally
+                        if (saved) {
+                            showAlert('Unable to open your mail client. Your message was saved locally.', 'success');
+                            form.reset();
+                        } else {
+                            showAlert('Failed to send or save your message. Please email us at ' + recipient + '.', 'error');
+                        }
+                    }
+                });
+            })();
+        </script>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">&copy; 2025 LuminaFrame</div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const links = document.querySelectorAll('.nav-links a');
+            const file = location.pathname.split('/').pop() || 'index.html';
+            links.forEach(a => {
+                const href = a.getAttribute('href');
+                if (href === file) a.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

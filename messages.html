@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Messages — LuminaFrame (Admin)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+  <main class="container py-12">
+    <header class="mb-6 text-center">
+      <h1 class="text-2xl font-semibold">Stored Contact Messages</h1>
+      <p class="text-gray-600 mt-2">This page lists messages saved locally in your browser (localStorage). Only visible on this device.</p>
+    </header>
+
+    <section class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-medium">Messages</h2>
+        <div class="flex gap-2">
+          <button id="refreshBtn" class="btn">Refresh</button>
+          <button id="clearAllBtn" class="btn btn-danger">Clear all</button>
+        </div>
+      </div>
+
+      <div id="noMessages" class="text-gray-600">No messages saved.</div>
+      <ul id="messagesList" class="space-y-4 mt-4"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="copyright">&copy; 2025 LuminaFrame</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const KEY = 'luminaframe_messages_v1';
+      const listEl = document.getElementById('messagesList');
+      const noEl = document.getElementById('noMessages');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const clearAllBtn = document.getElementById('clearAllBtn');
+
+      function loadMessages() {
+        try {
+          const raw = localStorage.getItem(KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          console.warn('Failed to parse messages:', e);
+          return [];
+        }
+      }
+
+      function saveMessages(arr) {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(arr));
+        } catch (e) {
+          console.warn('Failed to save messages:', e);
+        }
+      }
+
+      function render() {
+        const msgs = loadMessages().slice().reverse(); // newest first
+        listEl.innerHTML = '';
+        if (!msgs.length) {
+          noEl.style.display = 'block';
+          return;
+        }
+        noEl.style.display = 'none';
+        msgs.forEach((m) => {
+          const li = document.createElement('li');
+          li.className = 'p-4 border rounded';
+          li.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-medium">${escapeHtml(m.name || 'Anonymous')}</div>
+                <div class="text-sm text-gray-600">${escapeHtml(m.email || '')} • ${new Date(m.date).toLocaleString()}</div>
+              </div>
+              <div class="flex gap-2">
+                <button class="btn btn-sm copyBtn" data-id="${m.id}">Copy</button>
+                <button class="btn btn-sm btn-danger delBtn" data-id="${m.id}">Delete</button>
+              </div>
+            </div>
+            <pre class="whitespace-pre-wrap mt-3 text-gray-800">${escapeHtml(m.message || '')}</pre>
+          `;
+          listEl.appendChild(li);
+        });
+
+        // attach handlers
+        Array.from(document.querySelectorAll('.delBtn')).forEach(b => b.addEventListener('click', onDelete));
+        Array.from(document.querySelectorAll('.copyBtn')).forEach(b => b.addEventListener('click', onCopy));
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function onDelete(e) {
+        const id = Number(e.currentTarget.getAttribute('data-id'));
+        let arr = loadMessages();
+        arr = arr.filter(x => x.id !== id);
+        saveMessages(arr);
+        render();
+      }
+
+      function onCopy(e) {
+        const id = Number(e.currentTarget.getAttribute('data-id'));
+        const arr = loadMessages();
+        const msg = arr.find(x => x.id === id);
+        if (!msg) return;
+        const text = `From: ${msg.name} <${msg.email}>\nDate: ${new Date(msg.date).toLocaleString()}\n\n${msg.message}`;
+        navigator.clipboard?.writeText(text).then(() => {
+          e.currentTarget.textContent = 'Copied';
+          setTimeout(() => e.currentTarget.textContent = 'Copy', 1500);
+        }).catch(() => {
+          alert('Copy failed — your browser may not allow clipboard access.');
+        });
+      }
+
+      refreshBtn.addEventListener('click', render);
+      clearAllBtn.addEventListener('click', function () {
+        if (!confirm('Clear all saved messages from localStorage? This cannot be undone.')) return;
+        localStorage.removeItem(KEY);
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
