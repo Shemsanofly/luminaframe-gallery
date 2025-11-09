@@ -1,32 +1,30 @@
-# LuminaFrame — Simple image gallery
+ # LuminaFrame — Local image gallery
 
-LuminaFrame is a small, local image gallery with a lightbox and an upload area. Open `index.html` in your browser to run the project locally.
+ LuminaFrame is a small client-side image gallery with an interactive lightbox and a drag-and-drop / browse uploader.
 
-## What I changed
+ Functionality
 
-- Extracted the large inline `<style>` block from `index.html` into an external `styles.css` file.
-- Added Tailwind CSS via the official CDN (`<script src="https://cdn.tailwindcss.com"></script>`) in the head so you can use utility classes quickly.
-- Applied a few Tailwind utility classes to the header, hero heading, and the primary CTA to improve visual polish while keeping existing custom styles.
-- Added this `README.md` with usage notes.
+ - Responsive image grid with featured photos.
+ - Click an image to open the lightbox; navigate with prev/next buttons or Arrow keys; Escape closes the lightbox.
+ - Upload images via drag & drop or file picker; previews display prior to upload.
+ - Uploaded files are read with FileReader to data-URLs and appended to the gallery.
+ - Client-side persistence: uploaded data-URL images are saved to localStorage under `luminaframe_user_images_v1` (subject to browser storage limits).
+ - Filter images by category; deleting an image removes it from the gallery and persisted storage.
 
-Files updated/added:
+ Implementation notes (mechanism)
 
-- `index.html` — now links to `styles.css` and loads Tailwind via CDN. Small enhancements were added (Tailwind utility classes on header, hero, and CTA).
-- `styles.css` — the extracted custom CSS (previously inline in `index.html`).
-- `README.md` — this file.
+ - In-memory state: a `galleryImages` array holds initial images plus user uploads.
+ - Upload flow: files → FileReader → data-URL → push into `galleryImages` → `renderGallery()` → `saveStoredImages()` writes uploads to localStorage.
+ - Lightbox: `openLightbox(index)` sets `currentImageIndex`; `updateLightbox()` displays the image/caption; navigation wraps around the `galleryImages` array.
+ - Filtering: `filterGallery(filter)` shows/hides `.gallery-item` elements using their `data-category` attributes.
 
-## How to run
+ How to run
 
-1. Open the project folder in your editor or file explorer.
-2. Open `index.html` in your browser. (No server required for local testing.)
+ - Open `index.html` in your browser (no server required).
 
-On Windows you can right-click `index.html` and choose "Open with" → your browser, or run from PowerShell:
+ Notes
 
-```powershell
-start .\index.html
-```
-
-## Notes on Tailwind usage
+ - This project is entirely client-side; for larger persistence or multi-user features, use IndexedDB or a server backend.
 
 - Tailwind is loaded via CDN for convenience (great for prototyping). For production or more customization, integrate Tailwind using PostCSS or the Tailwind CLI so you can purge unused styles and configure the design system.
 
@@ -37,24 +35,8 @@ start .\index.html
 - Uploaded images are stored in your browser's localStorage so they remain visible when you reopen the page. This is client-side only and does not upload images to a server.
 - localStorage has size limits (typically a few MBs). Storing many or very large images may fail. If you receive a storage error, consider uploading fewer images or smaller images. For production, switch to a server-side storage or IndexedDB for larger data.
 
-If you'd like, I can switch the implementation to use IndexedDB for more robust local persistence.
-
-## Next steps / suggestions
-
-- Replace the Tailwind CDN with a proper build (Tailwind CLI / PostCSS) to remove unused CSS before deploying.
-- Gradually convert components to Tailwind utilities and remove overlapping rules from `styles.css` to reduce specificity clashes.
-- Improve lightbox transitions and add thumbnails or swipe gestures for mobile.
-
-If you'd like, I can:
-
-- Convert the layout to be mostly Tailwind utilities (cleaner, smaller CSS).
-- Create a small build setup with Tailwind CLI (adds `package.json` + build script).
-
-Tell me which next step you prefer and I'll implement it.
-
 ## Recent housekeeping
 
-- The About page was intentionally removed from the site navigation and replaced with a small placeholder that redirects to the homepage. The file `about.html` remains as a redirect/placeholder to avoid broken links; remove it entirely if you want the file deleted.
 - An admin messages page was added: `messages.html`. This page reads messages saved to localStorage under the key `luminaframe_messages_v1` and lets you view, copy, delete individual messages, or clear all stored messages.
 
 To access messages, open `messages.html` in the same browser where messages were submitted. Note: messages are stored locally on that browser only.
